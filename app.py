@@ -455,40 +455,72 @@ if lancer and fichiers_ent:
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Entreprises", nb_ent)
     c2.metric("Postes analysés", nb_postes)
-    c3.metric("⚠ Alertes écart", nb_alertes)
+    c3.metric("⚠ Alertes écart >20%", nb_alertes)
     c4.metric("Postes absents", nb_absents)
 
-    # ── Aperçu tableau ────────────────────────────────────────────────────────
-    st.subheader("Aperçu des prix")
-    lignes = []
-    for poste in postes_ref[:30]:
-        ligne = {
-            "N°": poste.get("numero",""),
-            "Désignation": poste.get("libelle","")[:55],
-            "Unité": poste.get("unite",""),
-        }
-        for nom_ent, ml in matchings.items():
-            m = next((x for x in ml
-                      if x["poste_reference"].get("libelle") == poste.get("libelle")), None)
-            sc = m.get("score_confiance","?") if m else "?"
-            pu = m.get("prix_unitaire_retenu") if m else None
-            if sc == "ABSENT":
-                ligne[nom_ent] = "ABSENT"
-            elif pu is not None:
-                ligne[nom_ent] = f"{pu:.2f} €"
+    st.info(f"✅ Analyse complète — {nb_postes} postes traités. Téléchargez le fichier Excel ci-dessous pour voir le détail complet.")
+
+    # ── Aperçu tableau — tous les postes avec filtre ──────────────────────────
+    with st.expander(f"👁 Aperçu des prix ({nb_postes} postes)", expanded=True):
+
+        # Filtre de recherche
+        filtre = st.text_input("🔍 Filtrer par libellé ou numéro", placeholder="ex: béton, fouille, 2-4...", key="filtre_apercu")
+
+        postes_affiches = postes_ref
+        if filtre.strip():
+            f_lower = filtre.strip().lower()
+            postes_affiches = [
+                p for p in postes_ref
+                if f_lower in p.get("libelle","").lower()
+                or f_lower in p.get("numero","").lower()
+            ]
+            st.caption(f"{len(postes_affiches)} poste(s) correspondant à « {filtre} »")
+
+        lignes = []
+        for poste in postes_affiches:
+            ligne = {
+                "N°": poste.get("numero",""),
+                "Désignation": poste.get("libelle","")[:60],
+                "Unité": poste.get("unite",""),
+            }
+            prix_ligne = []
+            for nom_ent, ml in matchings.items():
+                m = next((x for x in ml
+                          if x["poste_reference"].get("libelle") == poste.get("libelle")), None)
+                sc = m.get("score_confiance","?") if m else "?"
+                pu = m.get("prix_unitaire_retenu") if m else None
+                if sc == "ABSENT":
+                    ligne[nom_ent] = "ABSENT"
+                elif pu is not None:
+                    ligne[nom_ent] = f"{pu:.2f} €"
+                    prix_ligne.append(pu)
+                else:
+                    ligne[nom_ent] = f"({sc})"
+
+            # Alerte écart
+            if len(prix_ligne) >= 2:
+                moy = sum(prix_ligne) / len(prix_ligne)
+                ecart = (max(prix_ligne) - min(prix_ligne)) / moy if moy > 0 else 0
+                ligne["Écart"] = f"⚠ {ecart:.0%}" if ecart > 0.20 else f"{ecart:.0%}"
             else:
-                ligne[nom_ent] = f"({sc})"
-        lignes.append(ligne)
+                ligne["Écart"] = ""
 
-    df = pd.DataFrame(lignes)
+            lignes.append(ligne)
 
-    def colorier(val):
-        if val == "ABSENT": return "background-color: #DDDDDD; color: #666"
-        if "FAIBLE" in str(val): return "background-color: #FFF0E0"
-        return ""
+        df = pd.DataFrame(lignes)
 
-    # Appliquer style uniquement sur les colonnes entreprises
-    cols_ent = [c for c in df.columns if c not in ("N°","Désignation","Unité")]
+        def colorier(val):
+            if val == "ABSENT":       return "background-color: #E0E0E0; color: #888"
+            if str(val).startswith("⚠"): return "background-color: #FFCCCC; font-weight: bold"
+            if "FAIBLE" in str(val):  return "background-color: #FFF0E0"
+            return ""
+
+        cols_ent = [c for c in df.columns if c not in ("N°","Désignation","Unité","Écart")]
+        st.dataframe(
+            df.style.map(colorier, subset=cols_ent + ["Écart"]),
+            use_container_width=True,
+            height=min(600, 40 + len(lignes) * 35)
+        )    cols_ent = [c for c in df.columns if c not in ("N°","Désignation","Unité")]
     st.dataframe(
         df.style.applymap(colorier, subset=cols_ent),
         use_container_width=True, height=420
