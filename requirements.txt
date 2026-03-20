@@ -1,0 +1,8 @@
+pandas
+openpyxl
+pdfplumber
+anthropic
+streamlit
+python-dotenv
+numpy
+Pillow

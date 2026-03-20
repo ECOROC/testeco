@@ -1,0 +1,59 @@
+╔══════════════════════════════════════════════════════════════╗
+║           DPGF COMPARATOR — Guide de démarrage rapide        ║
+╚══════════════════════════════════════════════════════════════╝
+
+PREMIÈRE UTILISATION (une seule fois)
+══════════════════════════════════════
+1. Double-cliquez sur :  INSTALLER.bat
+   → Installe tout automatiquement (Python requis)
+   → Si Python n'est pas installé, l'installeur ouvre le site
+     et vous guide
+
+2. Si Python n'est pas installé :
+   → Allez sur python.org/downloads
+   → Téléchargez Python 3.11 ou 3.12
+   → IMPORTANT : cochez "Add Python to PATH" pendant l'install
+   → Relancez INSTALLER.bat
+
+UTILISATION QUOTIDIENNE
+════════════════════════
+Double-cliquez sur :  LANCER_DPGF_COMPARATOR.bat
+→ Votre navigateur s'ouvre avec l'interface
+→ Glissez-déposez votre archive AO et c'est parti
+
+ACTIVER LE MATCHING SÉMANTIQUE (recommandé)
+════════════════════════════════════════════
+Le matching IA (Claude) est nettement plus précis que
+le matching textuel, surtout quand les entreprises
+libellent leurs postes très différemment.
+
+1. Obtenez une clé API sur : console.anthropic.com
+   (compte gratuit, facturation à l'usage ~quelques centimes par AO)
+
+2. Ouvrez le fichier ".env" avec le Bloc-notes
+   (Clic droit → Ouvrir avec → Bloc-notes)
+
+3. Remplacez la ligne :
+   ANTHROPIC_API_KEY=sk-ant-api03-votre-cle-ici
+   par votre vraie clé.
+
+4. Sauvegardez et relancez l'application.
+
+STRUCTURE ATTENDUE DE VOTRE ARCHIVE AO
+════════════════════════════════════════
+AO_NomOperation/
+├── Entreprise_Dupont/
+│   └── DPGF/
+│       └── (fichier Excel ou PDF)
+├── Entreprise_Martin/
+│   └── DPGF/
+│       └── (fichier Excel ou PDF)
+└── ...
+
+Le nom de l'entreprise = nom du dossier (pas le nom du fichier)
+Excel prioritaire sur PDF si les deux sont présents
+
+SUPPORT
+════════
+En cas de problème, copiez le message d'erreur affiché
+et soumettez-le à Claude pour diagnostic.
