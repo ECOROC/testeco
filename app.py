@@ -520,11 +520,7 @@ if lancer and fichiers_ent:
             df.style.map(colorier, subset=cols_ent + ["Écart"]),
             use_container_width=True,
             height=min(600, 40 + len(lignes) * 35)
-        )    cols_ent = [c for c in df.columns if c not in ("N°","Désignation","Unité")]
-    st.dataframe(
-        df.style.applymap(colorier, subset=cols_ent),
-        use_container_width=True, height=420
-    )
+        )
 
     # ── Téléchargement ────────────────────────────────────────────────────────
     st.write("")
