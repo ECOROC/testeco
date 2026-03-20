@@ -383,7 +383,8 @@ if lancer and fichiers_ent:
             meilleure = max(postes_par_entreprise,
                             key=lambda k: len(postes_par_entreprise[k]))
             postes_ref = [
-                {**p, "prix_unitaire": None, "prix_total": None}
+                {**p, "prix_unitaire": None, "prix_total": None,
+                 "lot": lot_sel["num"], "lot_nom": lot_sel["nom"]}
                 for p in postes_par_entreprise[meilleure]
             ]
             st.write(f"  ✓ Référence reconstruite depuis {meilleure} — {len(postes_ref)} poste(s)")
