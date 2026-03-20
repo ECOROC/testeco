@@ -12,6 +12,17 @@ import streamlit as st
 import pandas as pd
 
 # ─── Config page ──────────────────────────────────────────────────────────────
+# ─── Utilitaires (définis en premier pour être disponibles partout) ───────────
+def _libelles_proches(a: str, b: str) -> bool:
+    """Vérifie si deux libellés sont proches pour l'appariement des quantités."""
+    import re
+    mots_a = set(re.sub(r"[^\w]", " ", a.lower()).split())
+    mots_b = set(re.sub(r"[^\w]", " ", b.lower()).split())
+    if not mots_a or not mots_b:
+        return False
+    return len(mots_a & mots_b) / max(len(mots_a), len(mots_b)) > 0.5
+
+
 st.set_page_config(
     page_title="DPGF Comparator",
     page_icon="📊",
@@ -495,10 +506,4 @@ if lancer and fichiers_ent:
             use_container_width=True
         )
 
-# ─── Utilitaire ───────────────────────────────────────────────────────────────
-def _libelles_proches(a: str, b: str) -> bool:
-    """Vérifie si deux libellés sont proches pour l'appariement des quantités."""
-    mots_a = set(re.sub(r"[^\w]"," ",a.lower()).split())
-    mots_b = set(re.sub(r"[^\w]"," ",b.lower()).split())
-    if not mots_a or not mots_b: return False
-    return len(mots_a & mots_b) / max(len(mots_a), len(mots_b)) > 0.5
+# fin de l'application
